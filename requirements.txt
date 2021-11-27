@@ -2,3 +2,4 @@ loguru==0.5.3
 praw==7.5.0
 moviepy==1.0.3
 pytube==11.0.1
+requests==2.22.0

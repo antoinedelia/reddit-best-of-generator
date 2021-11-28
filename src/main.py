@@ -1,10 +1,9 @@
 import argparse
 import os
-import shutil
+import media_helper
 from reddit import Reddit
 from dotenv import load_dotenv
 from loguru import logger
-import requests
 
 load_dotenv()
 
@@ -17,27 +16,9 @@ TEMP_FOLDER = "src/temp"
 parser = argparse.ArgumentParser(description="Reddit Best Of Generator")
 
 
-def download(id: str, url: str, dest_folder: str):
-    if not os.path.exists(dest_folder):
-        os.makedirs(dest_folder)
-
-    _, file_extension = os.path.splitext(url)
-    filename = id + file_extension
-    file_path = os.path.join(dest_folder, filename)
-
-    r = requests.get(url, stream=True)
-    if r.ok:
-        with open(file_path, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=1024 * 8):
-                if chunk:
-                    f.write(chunk)
-                    f.flush()
-                    os.fsync(f.fileno())
-    else:
-        logger.warning("Download failed: status code {}\n{}".format(r.status_code, r.text))
-
-
 def main():
+    logger.add("logs/file_{time}.log")
+
     parser.add_argument("--subreddit", "-sub", required=True,
                         help="specify subreddit to get posts from",
                         dest="subreddit")
@@ -93,8 +74,17 @@ def main():
     # We filter out posts that are self posts (not linking to a media such as image or video)
     for post in posts:
         if f"https://www.reddit.com{post.permalink}" == post.url or post.url.startswith("https://www.reddit.com"):
-            logger.info(f"Post {post.title} is not a media, skipping it.")
+            logger.info(f"Post {post.id} is not a media, skipping it.")
             continue
+
+        if post.__dict__["pinned"]:
+            logger.info(f"Post {post.id} is a pinned post, skipping it.")
+            continue
+
+        if post.__dict__["distinguished"] == "moderator":
+            logger.info(f"Post {post.id} is a moderator post, skipping it.")
+            continue
+
         filtered_posts.append(post)
 
     logger.info(f"{len(filtered_posts)} media posts found!")
@@ -107,14 +97,17 @@ def main():
             url = url.split("?")[0]  # remove query params
 
         logger.info(f"Downloading {url}")
-        download(post.id, url, TEMP_FOLDER)
+        media_helper.download_from_url(post.id, url, TEMP_FOLDER)
 
     # 3 - Create the video by combining the media
+    media_helper.combine_medias(filtered_posts, TEMP_FOLDER, TEMP_FOLDER)
 
     # 4 - Upload the media to Youtube
+    if upload_to_youtube:
+        logger.info("Uploading to Youtube")
 
     # 5 - Clean up the temp folder
-    shutil.rmtree(TEMP_FOLDER)
+    media_helper.delete_folder(TEMP_FOLDER)
 
 
 if __name__ == "__main__":

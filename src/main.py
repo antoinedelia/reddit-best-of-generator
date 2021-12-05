@@ -12,6 +12,8 @@ REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
 REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT")
 
 TEMP_FOLDER = "src/temp"
+DESTINATION_FOLDER = "output"
+DESTINATION_FILE_NAME = "output.mp4"
 
 parser = argparse.ArgumentParser(description="Reddit Best Of Generator")
 
@@ -81,6 +83,10 @@ def main():
             logger.info(f"Post {post.id} is a pinned post, skipping it.")
             continue
 
+        if post.__dict__["stickied"]:
+            logger.info(f"Post {post.id} is a stickied post, skipping it.")
+            continue
+
         if post.__dict__["distinguished"] == "moderator":
             logger.info(f"Post {post.id} is a moderator post, skipping it.")
             continue
@@ -89,18 +95,31 @@ def main():
 
     logger.info(f"{len(filtered_posts)} media posts found!")
 
+    # Unused for now but could be useful in the future
+    # post.__dict__["post_hint"] -> "hosted:video"
+    # post.__dict__["domain"] -> "v.redd.it"
+    # post.__dict__["url_overridden_by_dest"] -> "https://v.redd.it/1xrjl5eo5k181"
+    # post.__dict__["archived"] -> False
+    # post.__dict__["spoiler"] -> False
+    # post.__dict__["locked"] -> False
+    # post.__dict__["is_video"] -> True
+    # post.__dict__["media"]["reddit_video"]["duration"] -> 20
+    # post.__dict__["media"]["reddit_video"]["is_gif"] -> False
+
     # 2 - Download the media from the posts
     for post in filtered_posts:
         url = post.url
         if post.url.startswith("https://v.redd.it"):
             url = post.__dict__["secure_media"]["reddit_video"]["fallback_url"]
-            url = url.split("?")[0]  # remove query params
+            url = url.split("?")[0]  # Remove query params
+            # TODO also download the audio of the clip
+            # i.e: https://v.redd.it/7e2tz9mbkly71/DASH_720.mp4 ->https://v.redd.it/7e2tz9mbkly71/DASH_audio.mp4
 
         logger.info(f"Downloading {url}")
         media_helper.download_from_url(post.id, url, TEMP_FOLDER)
 
     # 3 - Create the video by combining the media
-    media_helper.combine_medias(filtered_posts, TEMP_FOLDER, TEMP_FOLDER)
+    media_helper.combine_medias(filtered_posts, TEMP_FOLDER, DESTINATION_FOLDER, DESTINATION_FILE_NAME)
 
     # 4 - Upload the media to Youtube
     if upload_to_youtube:

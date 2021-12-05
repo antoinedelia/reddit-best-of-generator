@@ -4,6 +4,7 @@ import requests
 from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.VideoClip import TextClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
+import moviepy.editor as editor
 from loguru import logger
 
 VIDEO_EXTENSIONS = [".mp4", ".mkv", ".avi", ".mov"]
@@ -35,7 +36,7 @@ def download_from_url(id: str, url: str, dest_folder: str):
         logger.info(f"{file_path} already exists.")
         return
 
-    # Need youtube-dl to download the video
+    # TODO Need youtube-dl to download the video
     if "youtube" in url or "youtu.be" in url:
         logger.warning(f"{url} is a youtube video, not implemented yet.")
         return
@@ -61,28 +62,34 @@ def download_from_url(id: str, url: str, dest_folder: str):
         logger.warning("Download failed: status code {}\n{}".format(r.status_code, r.text))
 
 
-def combine_medias(posts: list, source_folder: str, dest_folder: str):
+def combine_medias(posts: list, source_folder: str, dest_folder: str, dest_filename: str):
     if not os.path.exists(dest_folder):
         os.makedirs(dest_folder)
 
     filenames = next(os.walk(source_folder), (None, None, []))[2]
+    clips = []
     for file in filenames:
         file_path = os.path.join(source_folder, file)
         post = next(iter(filter(lambda p: file.startswith(p.id), posts)), None)
 
         _, file_extension = os.path.splitext(file)
+
         if file_extension in VIDEO_EXTENSIONS:
             logger.info(f"Adding {file_path} to the video")
-            video = VideoFileClip(file_path).subclip(0, 10)
+            video = VideoFileClip(file_path)
 
             # Make the text. Many more options are available.
             txt_clip = TextClip(post.title, font="DejaVu-Sans-Mono", fontsize=20, color='white')
-            txt_clip = txt_clip.set_duration(10)
+            txt_clip = txt_clip.set_duration(video.duration)
             txt_clip = txt_clip.set_position("center")
 
             result = CompositeVideoClip([video, txt_clip])  # Overlay text on video
-            result_path = os.path.join(dest_folder, "new_" + file)
-            result.write_videofile(result_path, fps=25)  # Many options...
+            clips.append(result)
+
+    final_path = os.path.join(dest_folder, dest_filename)
+    logger.info(f"Combining {len(clips)} videos in {final_path}")
+    concat_clip = editor.concatenate_videoclips(clips, method="compose")
+    concat_clip.write_videofile(final_path, codec="mpeg4")
 
 
 def delete_folder(folder_path: str):

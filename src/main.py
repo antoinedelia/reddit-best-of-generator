@@ -4,6 +4,8 @@ import media_helper
 from reddit import Reddit
 from dotenv import load_dotenv
 from loguru import logger
+from dataclasses import dataclass
+from typing import List
 
 load_dotenv()
 
@@ -15,7 +17,20 @@ TEMP_FOLDER = "src/temp"
 DESTINATION_FOLDER = "output"
 DESTINATION_FILE_NAME = "output.mp4"
 
+IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif"]
+
 parser = argparse.ArgumentParser(description="Reddit Best Of Generator")
+
+
+@dataclass
+class Media:
+    id: str
+    title: str
+    type: str
+    original_url: str
+    is_reddit_media: bool = False
+    reddit_video_url: str = None
+    reddit_audio_url: str = None
 
 
 def main():
@@ -49,6 +64,10 @@ def main():
                         help="specify the output of where to store the final result of your video",
                         dest="output_path")
 
+    parser.add_argument("--delete-temp", required=False, action="store_true",
+                        help="specify the output of where to store the final result of your video",
+                        dest="delete_temp")
+
     args = parser.parse_args()
 
     subreddit = args.subreddit
@@ -57,6 +76,7 @@ def main():
     upload_to_youtube = args.upload_to_youtube
     nsfw = args.nsfw
     posts_limit = args.posts_limit
+    delete_temp = args.delete_temp
 
     logger.info(f"Getting {posts_limit} {type} posts from /r/{subreddit}")
     if type == "top":
@@ -72,7 +92,8 @@ def main():
 
     logger.info(f"{len(posts)} posts found!")
 
-    filtered_posts = []
+    filtered_posts: List['Media'] = []
+
     # We filter out posts that are self posts (not linking to a media such as image or video)
     for post in posts:
         if f"https://www.reddit.com{post.permalink}" == post.url or post.url.startswith("https://www.reddit.com"):
@@ -91,7 +112,34 @@ def main():
             logger.info(f"Post {post.id} is a moderator post, skipping it.")
             continue
 
-        filtered_posts.append(post)
+        _, file_extension = os.path.splitext(post.url)
+        if file_extension in IMAGE_EXTENSIONS:
+            logger.info(f"Post {post.id} is a image, skipping it.")
+            continue
+
+        if post.url.startswith("https://v.redd.it"):
+            original_url = post.__dict__["secure_media"]["reddit_video"]["fallback_url"]
+            filtered_posts.append(
+                Media(
+                    id=post.id,
+                    title=post.title,
+                    type=post.__dict__["post_hint"],
+                    is_reddit_media=True,
+                    original_url=original_url,
+                    reddit_video_url=original_url.split("?")[0],
+                    reddit_audio_url="/".join(original_url.split("?")[0].split("/")[:-1]) + "/DASH_audio.mp4"
+                )
+            )
+        else:
+            filtered_posts.append(
+                Media(
+                    id=post.id,
+                    title=post.title,
+                    type=post.__dict__["post_hint"],
+                    is_reddit_media=False,
+                    original_url=post.url,
+                )
+            )
 
     logger.info(f"{len(filtered_posts)} media posts found!")
 
@@ -108,15 +156,15 @@ def main():
 
     # 2 - Download the media from the posts
     for post in filtered_posts:
-        url = post.url
-        if post.url.startswith("https://v.redd.it"):
-            url = post.__dict__["secure_media"]["reddit_video"]["fallback_url"]
-            url = url.split("?")[0]  # Remove query params
-            # TODO also download the audio of the clip
-            # i.e: https://v.redd.it/7e2tz9mbkly71/DASH_720.mp4 ->https://v.redd.it/7e2tz9mbkly71/DASH_audio.mp4
+        if post.is_reddit_media:
+            logger.info(f"Downloading Reddit video {post.reddit_video_url}")
+            media_helper.download_from_url(f"video_{post.id}", post.reddit_video_url, TEMP_FOLDER)
 
-        logger.info(f"Downloading {url}")
-        media_helper.download_from_url(post.id, url, TEMP_FOLDER)
+            logger.info(f"Downloading Reddit audio {post.reddit_audio_url}")
+            media_helper.download_from_url(f"audio_{post.id}", post.reddit_audio_url, TEMP_FOLDER)
+        else:
+            logger.info(f"Downloading video {post.original_url}")
+            media_helper.download_from_url(f"video_{post.id}", post.original_url, TEMP_FOLDER)
 
     # 3 - Create the video by combining the media
     media_helper.combine_medias(filtered_posts, TEMP_FOLDER, DESTINATION_FOLDER, DESTINATION_FILE_NAME)
@@ -126,7 +174,8 @@ def main():
         logger.info("Uploading to Youtube")
 
     # 5 - Clean up the temp folder
-    media_helper.delete_folder(TEMP_FOLDER)
+    if delete_temp:
+        media_helper.delete_folder(TEMP_FOLDER)
 
 
 if __name__ == "__main__":

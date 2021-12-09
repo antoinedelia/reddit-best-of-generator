@@ -1,7 +1,8 @@
 import os
 import shutil
+from typing import List
+from main import Media
 import requests
-from moviepy.video.io.VideoFileClip import VideoFileClip
 from moviepy.video.VideoClip import TextClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 import moviepy.editor as editor
@@ -62,21 +63,21 @@ def download_from_url(id: str, url: str, dest_folder: str):
         logger.warning("Download failed: status code {}\n{}".format(r.status_code, r.text))
 
 
-def combine_medias(posts: list, source_folder: str, dest_folder: str, dest_filename: str):
+def combine_medias(posts: List[Media], source_folder: str, dest_folder: str, dest_filename: str):
     if not os.path.exists(dest_folder):
         os.makedirs(dest_folder)
 
-    filenames = next(os.walk(source_folder), (None, None, []))[2]
     clips = []
-    for file in filenames:
-        file_path = os.path.join(source_folder, file)
-        post = next(iter(filter(lambda p: file.startswith(p.id), posts)), None)
+    logger.info(posts)
+    for post in posts:
+        if post.is_reddit_media:
+            video_file_path = os.path.join(source_folder, f"video_{post.id}.mp4")
+            audio_file_path = os.path.join(source_folder, f"audio_{post.id}.mp4")
 
-        _, file_extension = os.path.splitext(file)
-
-        if file_extension in VIDEO_EXTENSIONS:
-            logger.info(f"Adding {file_path} to the video")
-            video = VideoFileClip(file_path)
+            logger.info(f"Combinining audio and video of post {post.id}")
+            video = editor.VideoFileClip(video_file_path)
+            audio = editor.AudioFileClip(audio_file_path)
+            video = video.set_audio(audio)
 
             # Make the text. Many more options are available.
             txt_clip = TextClip(post.title, font="DejaVu-Sans-Mono", fontsize=20, color='white')
@@ -89,7 +90,7 @@ def combine_medias(posts: list, source_folder: str, dest_folder: str, dest_filen
     final_path = os.path.join(dest_folder, dest_filename)
     logger.info(f"Combining {len(clips)} videos in {final_path}")
     concat_clip = editor.concatenate_videoclips(clips, method="compose")
-    concat_clip.write_videofile(final_path, codec="mpeg4")
+    concat_clip.write_videofile(final_path)
 
 
 def delete_folder(folder_path: str):

@@ -1,7 +1,7 @@
 import os
 import shutil
 from typing import List
-from main import Media
+from dataclasses import dataclass
 import requests
 from moviepy.video.VideoClip import TextClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
@@ -17,6 +17,17 @@ PROVIDER_EXTENSIONS_MAP = {
     "reddit": ".jpg",
     "gfycat": ".gif",
 }
+
+
+@dataclass
+class Media:
+    id: str
+    title: str
+    type: str
+    original_url: str
+    is_reddit_media: bool = False
+    reddit_video_url: str = None
+    reddit_audio_url: str = None
 
 
 def download_from_url(id: str, url: str, dest_folder: str):
@@ -76,6 +87,15 @@ def combine_medias(posts: List[Media], source_folder: str, dest_folder: str, des
 
             logger.info(f"Combinining audio and video of post {post.id}")
             video = editor.VideoFileClip(video_file_path)
+            if video.w > 1920:
+                video = video.resize(width=1920)
+            if video.h > 1080:
+                video = video.resize(height=1080)
+
+            if video.w >= video.h:
+                video = video.resize(width=1920)
+            else:
+                video = video.resize(height=1080)
             audio = editor.AudioFileClip(audio_file_path)
             video = video.set_audio(audio)
 

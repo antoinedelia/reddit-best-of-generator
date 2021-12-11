@@ -24,4 +24,6 @@ $ echo REDDIT_CLIENT_SECRTET=YOUR_REDDIT_CLIENT_SECRET >> .env
 $ echo REDDIT_USER_AGENT=SOME_USER_AGENT >> .env
 
 $ python src/main.py --subreddit=funny --output=output.mp4
+$ python src/main.py --subreddit=TikTokCringe -output=output.mp4 --type=top --time=month --keep-temp-files --posts-limit=3
+$ python src/main.py --subreddit=FortniteBr -output=output.mp4 --type=top --time=month  --keep-temp-files
 ```

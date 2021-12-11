@@ -4,7 +4,6 @@ import media_helper
 from reddit import Reddit
 from dotenv import load_dotenv
 from loguru import logger
-from dataclasses import dataclass
 from typing import List
 
 load_dotenv()
@@ -13,24 +12,13 @@ REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
 REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
 REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT")
 
-TEMP_FOLDER = "src/temp"
+TEMP_FOLDER = "temp"
 DESTINATION_FOLDER = "output"
 DESTINATION_FILE_NAME = "output.mp4"
 
 IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif"]
 
 parser = argparse.ArgumentParser(description="Reddit Best Of Generator")
-
-
-@dataclass
-class Media:
-    id: str
-    title: str
-    type: str
-    original_url: str
-    is_reddit_media: bool = False
-    reddit_video_url: str = None
-    reddit_audio_url: str = None
 
 
 def main():
@@ -64,9 +52,9 @@ def main():
                         help="specify the output of where to store the final result of your video",
                         dest="output_path")
 
-    parser.add_argument("--delete-temp", required=False, action="store_true",
-                        help="specify the output of where to store the final result of your video",
-                        dest="delete_temp")
+    parser.add_argument("--keep-temp-files", required=False, action="store_true",
+                        help="whether we should keep the temporary files downloaded, defaults to false",
+                        dest="keep_temp_files")
 
     args = parser.parse_args()
 
@@ -76,7 +64,7 @@ def main():
     upload_to_youtube = args.upload_to_youtube
     nsfw = args.nsfw
     posts_limit = args.posts_limit
-    delete_temp = args.delete_temp
+    keep_temp_files = args.keep_temp_files
 
     logger.info(f"Getting {posts_limit} {type} posts from /r/{subreddit}")
     if type == "top":
@@ -92,7 +80,7 @@ def main():
 
     logger.info(f"{len(posts)} posts found!")
 
-    filtered_posts: List['Media'] = []
+    filtered_posts: List['media_helper.Media'] = []
 
     # We filter out posts that are self posts (not linking to a media such as image or video)
     for post in posts:
@@ -120,7 +108,7 @@ def main():
         if post.url.startswith("https://v.redd.it"):
             original_url = post.__dict__["secure_media"]["reddit_video"]["fallback_url"]
             filtered_posts.append(
-                Media(
+                media_helper.Media(
                     id=post.id,
                     title=post.title,
                     type=post.__dict__["post_hint"],
@@ -132,7 +120,7 @@ def main():
             )
         else:
             filtered_posts.append(
-                Media(
+                media_helper.Media(
                     id=post.id,
                     title=post.title,
                     type=post.__dict__["post_hint"],
@@ -174,7 +162,7 @@ def main():
         logger.info("Uploading to Youtube")
 
     # 5 - Clean up the temp folder
-    if delete_temp:
+    if not keep_temp_files:
         media_helper.delete_folder(TEMP_FOLDER)
 
 

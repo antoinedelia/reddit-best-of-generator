@@ -107,17 +107,21 @@ def main():
 
         if post.url.startswith("https://v.redd.it"):
             original_url = post.__dict__["secure_media"]["reddit_video"]["fallback_url"]
-            filtered_posts.append(
-                media_helper.Media(
-                    id=post.id,
-                    title=post.title,
-                    type=post.__dict__["post_hint"],
-                    is_reddit_media=True,
-                    original_url=original_url,
-                    reddit_video_url=original_url.split("?")[0],
-                    reddit_audio_url="/".join(original_url.split("?")[0].split("/")[:-1]) + "/DASH_audio.mp4"
-                )
+            new_media = media_helper.Media(
+                id=post.id,
+                title=post.title,
+                type=post.__dict__["post_hint"],
+                is_reddit_media=True,
+                original_url=original_url,
+                reddit_video_url=original_url.split("?")[0],
             )
+            # Old v.redd.it links have a different audio url
+            if "mp4" in original_url:
+                new_media.reddit_audio_url = "/".join(original_url.split("?")[0].split("/")[:-1]) + "/DASH_audio.mp4"
+            else:
+                new_media.reddit_audio_url = "/".join(original_url.split("?")[0].split("/")[:-1]) + "/audio"
+
+            filtered_posts.append(new_media)
         else:
             filtered_posts.append(
                 media_helper.Media(

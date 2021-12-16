@@ -3,7 +3,7 @@ import shutil
 from typing import List
 from dataclasses import dataclass
 import requests
-from moviepy.video.VideoClip import TextClip
+from moviepy.video.VideoClip import TextClip, ColorClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 import moviepy.editor as editor
 from loguru import logger
@@ -16,6 +16,7 @@ PROVIDER_EXTENSIONS_MAP = {
     "imgur": ".gif",
     "reddit": ".jpg",
     "gfycat": ".gif",
+    "v.redd.it": ".mp4",
 }
 
 
@@ -59,7 +60,11 @@ def download_from_url(id: str, url: str, dest_folder: str):
 
     # Gfycat redirects to a web page, not directly to the video
     if "gfycat" in url:
-        logger.warning(f"{url} is an gfycat link, not implemented yet.")
+        logger.warning(f"{url} is a gfycat link, not implemented yet.")
+        return
+
+    if "twitch" in url:
+        logger.warning(f"{url} is a twitch link, not implemented yet.")
         return
 
     r = requests.get(url, stream=True)
@@ -87,24 +92,43 @@ def combine_medias(posts: List[Media], source_folder: str, dest_folder: str, des
 
             logger.info(f"Combinining audio and video of post {post.id}")
             video = editor.VideoFileClip(video_file_path)
+            if video.w >= video.h:
+                video = video.resize(width=1920)
+            else:
+                video = video.resize(height=1080)
+
             if video.w > 1920:
                 video = video.resize(width=1920)
             if video.h > 1080:
                 video = video.resize(height=1080)
 
-            if video.w >= video.h:
-                video = video.resize(width=1920)
-            else:
-                video = video.resize(height=1080)
-            audio = editor.AudioFileClip(audio_file_path)
-            video = video.set_audio(audio)
+            try:
+                audio = editor.AudioFileClip(audio_file_path)
+                video = video.set_audio(audio)
+            except Exception as e:
+                logger.warning(f"Could not load audio for post {post.id}: {e}")
 
-            # Make the text. Many more options are available.
-            txt_clip = TextClip(post.title, font="DejaVu-Sans-Mono", fontsize=20, color='white')
-            txt_clip = txt_clip.set_duration(video.duration)
-            txt_clip = txt_clip.set_position("center")
+            # TODO if the text is too long, it does not fit in the video
+            text_clip = TextClip(
+                post.title,
+                font="Roboto-Black",
+                fontsize=35,
+                color='white',
+            )
+            text_clip = text_clip.set_position("center")
+            image_width, image_height = text_clip.size
+            padding = 20
+            color_clip = ColorClip(
+                size=(image_width + padding, image_height + padding),
+                color=(0, 0, 0)
+            )
+            color_clip = color_clip.set_opacity(.8)
 
-            result = CompositeVideoClip([video, txt_clip])  # Overlay text on video
+            final_text_clip = CompositeVideoClip([color_clip, text_clip])
+            final_text_clip = final_text_clip.set_duration(video.duration)
+            final_text_clip = final_text_clip.set_position(("left", "bottom"))
+
+            result = CompositeVideoClip([video, final_text_clip])  # Overlay text on video
             clips.append(result)
 
     final_path = os.path.join(dest_folder, dest_filename)

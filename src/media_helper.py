@@ -1,5 +1,6 @@
 import os
 import shutil
+import textwrap
 from typing import List
 from dataclasses import dataclass
 import requests
@@ -108,11 +109,12 @@ def combine_medias(posts: List[Media], source_folder: str, dest_folder: str, des
             except Exception as e:
                 logger.warning(f"Could not load audio for post {post.id}: {e}")
 
-            # TODO if the text is too long, it does not fit in the video
+            max_chars = 150 if video.w > 1500 else 75
             text_clip = TextClip(
-                post.title,
+
+                "\n".join(textwrap.wrap(post.title, max_chars, break_long_words=False)),
                 font="Roboto-Black",
-                fontsize=35,
+                fontsize=25,
                 color='white',
             )
             text_clip = text_clip.set_position("center")

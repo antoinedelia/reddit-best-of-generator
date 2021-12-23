@@ -4,7 +4,7 @@ from src.media_helper import Media, download_from_url, combine_medias
 TEMP_FOLDER = "temp"
 
 
-def test_combine_medias():
+def test_mixed_resolutions():
     posts: List[Media] = []
     posts.append(
         Media(
@@ -36,20 +36,26 @@ def test_combine_medias():
         else:
             download_from_url(f"video_{post.id}", post.original_url, TEMP_FOLDER)
 
-    combine_medias(posts, TEMP_FOLDER, "output/test", "test_output.mp4")
+    combine_medias(posts, TEMP_FOLDER, "output/test", "mixed_resolutions.mp4")
 
 
 def test_small_video_large_title():
     posts: List[Media] = []
+    title = """
+This poor player is about to get banned cause he emoted.
+If four people were spectating me I'd be emoting too just to piss them off.
+There is absolutely 0 proof that this guy was stream sniping but we all know
+how Epic and Ninja suck each other off so this guy is getting banned for sure.
+"""
     posts.append(
         Media(
-            id='23zhctljv3c11',
-            title='This poor player is about to get banned cause he emoted. If four people were spectating me I’d be emoting too just to piss them off. There is absolutely 0 proof that this guy was stream sniping but we all know how Epic and Ninja suck each other off so this guy is getting banned for sure.',
+            id='fcrnasyw7yu01',
+            title=title,
             type='hosted:video',
-            original_url='https://v.redd.it/23zhctljv3c11/DASH_4_8_M#mp4',
+            original_url='https://v.redd.it/fcrnasyw7yu01/DASH_4_8_M#mp4',
             is_reddit_media=True,
-            reddit_video_url='https://v.redd.it/23zhctljv3c11/DASH_4_8_M',
-            reddit_audio_url='https://v.redd.it/23zhctljv3c11/audio'
+            reddit_video_url='https://v.redd.it/fcrnasyw7yu01/DASH_4_8_M',
+            reddit_audio_url='https://v.redd.it/fcrnasyw7yu01/audio'
         )
     )
     for post in posts:
@@ -59,4 +65,4 @@ def test_small_video_large_title():
         else:
             download_from_url(f"video_{post.id}", post.original_url, TEMP_FOLDER)
 
-    combine_medias(posts, TEMP_FOLDER, "output/test", "test_output.mp4")
+    combine_medias(posts, TEMP_FOLDER, "output/test", "small_video_large_title.mp4")

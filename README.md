@@ -15,6 +15,8 @@ $ sudo apt-get install libraqm-dev
 $ sudo vim /etc/ImageMagick-7/policy.xml
 ```
 
+To insert the posts's titles, we use the Roboto font. If you don't have it, please install it or update the font in the code. 
+
 ```shell
 $ pip install -r requirements.txt
 

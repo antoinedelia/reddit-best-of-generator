@@ -8,25 +8,25 @@ def test_mixed_resolutions():
     posts: List[Media] = []
     posts.append(
         Media(
-            id='r2m6y2',
-            title='The female gaze',
-            type='hosted:video',
-            original_url='https://v.redd.it/c5p4xz3fpx181/DASH_720.mp4?source=fallback',
+            id="r2m6y2",
+            title="The female gaze",
+            type="hosted:video",
+            original_url="https://v.redd.it/c5p4xz3fpx181/DASH_720.mp4?source=fallback",
             is_reddit_media=True,
-            reddit_video_url='https://v.redd.it/c5p4xz3fpx181/DASH_720.mp4',
-            reddit_audio_url='https://v.redd.it/c5p4xz3fpx181/DASH_audio.mp4'
+            reddit_video_url="https://v.redd.it/c5p4xz3fpx181/DASH_720.mp4",
+            reddit_audio_url="https://v.redd.it/c5p4xz3fpx181/DASH_audio.mp4",
         )
     )
 
     posts.append(
         Media(
-            id='r1740v',
-            title='Welcome to the beginning of The End. Chapter 2 Finale I 12.4.21 I 4 PM ET',
-            type='hosted:video',
-            original_url='https://v.redd.it/1xrjl5eo5k181/DASH_720.mp4?source=fallback',
+            id="r1740v",
+            title="Welcome to the beginning of The End. Chapter 2 Finale I 12.4.21 I 4 PM ET",
+            type="hosted:video",
+            original_url="https://v.redd.it/1xrjl5eo5k181/DASH_720.mp4?source=fallback",
             is_reddit_media=True,
-            reddit_video_url='https://v.redd.it/1xrjl5eo5k181/DASH_720.mp4',
-            reddit_audio_url='https://v.redd.it/1xrjl5eo5k181/DASH_audio.mp4'
+            reddit_video_url="https://v.redd.it/1xrjl5eo5k181/DASH_720.mp4",
+            reddit_audio_url="https://v.redd.it/1xrjl5eo5k181/DASH_audio.mp4",
         )
     )
     for post in posts:
@@ -49,13 +49,13 @@ how Epic and Ninja suck each other off so this guy is getting banned for sure.
 """
     posts.append(
         Media(
-            id='fcrnasyw7yu01',
+            id="fcrnasyw7yu01",
             title=title,
-            type='hosted:video',
-            original_url='https://v.redd.it/fcrnasyw7yu01/DASH_4_8_M#mp4',
+            type="hosted:video",
+            original_url="https://v.redd.it/fcrnasyw7yu01/DASH_4_8_M#mp4",
             is_reddit_media=True,
-            reddit_video_url='https://v.redd.it/fcrnasyw7yu01/DASH_4_8_M',
-            reddit_audio_url='https://v.redd.it/fcrnasyw7yu01/audio'
+            reddit_video_url="https://v.redd.it/fcrnasyw7yu01/DASH_4_8_M",
+            reddit_audio_url="https://v.redd.it/fcrnasyw7yu01/audio",
         )
     )
     for post in posts:

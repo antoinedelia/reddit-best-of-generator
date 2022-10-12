@@ -24,37 +24,69 @@ parser = argparse.ArgumentParser(description="Reddit Best Of Generator")
 def main():
     logger.add("logs/file_{time}.log")
 
-    parser.add_argument("--subreddit", "-sub", required=True,
-                        help="specify subreddit to get posts from",
-                        dest="subreddit")
+    parser.add_argument(
+        "--subreddit", "-sub", required=True, help="specify subreddit to get posts from", dest="subreddit"
+    )
 
-    parser.add_argument("--type", required=False,
-                        help="specify the type of content to get (hot, new, top, rising, controversial, gilded)",
-                        dest="type", default="hot")
+    parser.add_argument(
+        "--type",
+        required=False,
+        help="specify the type of content to get (hot, new, top, rising, controversial, gilded)",
+        dest="type",
+        default="hot",
+    )
 
-    parser.add_argument("--time", required=False,
-                        help="if type is top, specify the period of time (hour, day, week, month, year, all)",
-                        dest="time", default="day")
+    parser.add_argument(
+        "--time",
+        required=False,
+        help="if type is top, specify the period of time (hour, day, week, month, year, all)",
+        dest="time",
+        default="day",
+    )
 
-    parser.add_argument("--upload-to-youtube", required=False, action="store_true",
-                        help="whether to upload the output video to Youtube",
-                        dest="upload_to_youtube")
+    parser.add_argument(
+        "--upload-to-youtube",
+        required=False,
+        action="store_true",
+        help="whether to upload the output video to Youtube",
+        dest="upload_to_youtube",
+    )
 
-    parser.add_argument("--nsfw", required=False, action="store_true",
-                        help="whether to include nsfw content",
-                        dest="nsfw", default=False)
+    parser.add_argument(
+        "--nsfw",
+        required=False,
+        action="store_true",
+        help="whether to include nsfw content",
+        dest="nsfw",
+        default=False,
+    )
 
-    parser.add_argument("--posts-limit", "-limit", required=False, type=int,
-                        help="specify how many posts to get to make the best of",
-                        dest="posts_limit", default=10)
+    parser.add_argument(
+        "--posts-limit",
+        "-limit",
+        required=False,
+        type=int,
+        help="specify how many posts to get to make the best of",
+        dest="posts_limit",
+        default=10,
+    )
 
-    parser.add_argument("--output-path", "-output", required=True, type=str,
-                        help="specify the output of where to store the final result of your video",
-                        dest="output_path")
+    parser.add_argument(
+        "--output-path",
+        "-output",
+        required=True,
+        type=str,
+        help="specify the output of where to store the final result of your video",
+        dest="output_path",
+    )
 
-    parser.add_argument("--keep-temp-files", required=False, action="store_true",
-                        help="whether we should keep the temporary files downloaded, defaults to false",
-                        dest="keep_temp_files")
+    parser.add_argument(
+        "--keep-temp-files",
+        required=False,
+        action="store_true",
+        help="whether we should keep the temporary files downloaded, defaults to false",
+        dest="keep_temp_files",
+    )
 
     args = parser.parse_args()
 
@@ -80,7 +112,7 @@ def main():
 
     logger.info(f"{len(posts)} posts found!")
 
-    filtered_posts: List['media_helper.Media'] = []
+    filtered_posts: List["media_helper.Media"] = []
 
     # We filter out posts that are self posts (not linking to a media such as image or video)
     for post in posts:
@@ -134,6 +166,10 @@ def main():
             )
 
     logger.info(f"{len(filtered_posts)} media posts found!")
+
+    if not filtered_posts:
+        logger.warning("No media post found, exiting...")
+        exit()
 
     # Unused for now but could be useful in the future
     # post.__dict__["post_hint"] -> "hosted:video"

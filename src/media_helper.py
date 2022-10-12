@@ -70,7 +70,7 @@ def download_from_url(id: str, url: str, dest_folder: str):
 
     r = requests.get(url, stream=True)
     if r.ok:
-        with open(file_path, 'wb') as f:
+        with open(file_path, "wb") as f:
             for chunk in r.iter_content(chunk_size=1024 * 8):
                 if chunk:
                     f.write(chunk)
@@ -109,22 +109,19 @@ def combine_medias(posts: List[Media], source_folder: str, dest_folder: str, des
             except Exception as e:
                 logger.warning(f"Could not load audio for post {post.id}: {e}")
 
-            max_chars = 150 if video.w > 1500 else 75
+            # Reduce the number of chars per line, depending on video width
+            max_chars = 150 if video.w > 1500 else 75 if video.w > 1000 else 40
             text_clip = TextClip(
-
                 "\n".join(textwrap.wrap(post.title, max_chars, break_long_words=False)),
                 font="Roboto-Black",
                 fontsize=25,
-                color='white',
+                color="white",
             )
             text_clip = text_clip.set_position("center")
             image_width, image_height = text_clip.size
             padding = 20
-            color_clip = ColorClip(
-                size=(image_width + padding, image_height + padding),
-                color=(0, 0, 0)
-            )
-            color_clip = color_clip.set_opacity(.8)
+            color_clip = ColorClip(size=(image_width + padding, image_height + padding), color=(0, 0, 0))
+            color_clip = color_clip.set_opacity(0.8)
 
             final_text_clip = CompositeVideoClip([color_clip, text_clip])
             final_text_clip = final_text_clip.set_duration(video.duration)

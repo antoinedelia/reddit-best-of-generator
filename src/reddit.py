@@ -8,9 +8,7 @@ class Reddit:
         self.user_agent = user_agent
 
         self.reddit = praw.Reddit(
-            client_id=self.client_id,
-            client_secret=self.client_secret,
-            user_agent=self.user_agent
+            client_id=self.client_id, client_secret=self.client_secret, user_agent=self.user_agent
         )
 
     def get_hot_posts(self, subreddit: str, limit: int = 10, include_nsfw: bool = False) -> list:
@@ -22,7 +20,9 @@ class Reddit:
 
         return posts
 
-    def get_new_posts(self, subreddit: str, limit: int = 10, include_nsfw: bool = False) -> praw.models.listing.generator.ListingGenerator:
+    def get_new_posts(
+        self, subreddit: str, limit: int = 10, include_nsfw: bool = False
+    ) -> praw.models.listing.generator.ListingGenerator:
         """Get the last posts from a subreddit."""
         subreddit = self.reddit.subreddit(subreddit)
         print(subreddit.display_name)

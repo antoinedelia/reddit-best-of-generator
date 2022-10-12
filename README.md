@@ -17,6 +17,14 @@ $ sudo vim /etc/ImageMagick-7/policy.xml
 
 To insert the posts's titles, we use the Roboto font. If you don't have it, please install it or update the font in the code. 
 
+### Youtube credentials
+
+1. https://developers.google.com/identity/protocols/oauth2/web-server#creatingcred
+
+2. Place the `client_secrets.json` file at the root of the project.
+
+## Run the script
+
 ```shell
 $ pip install -r requirements.txt
 

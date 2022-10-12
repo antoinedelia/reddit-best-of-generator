@@ -1,5 +1,8 @@
 loguru==0.5.3
-praw==7.5.0
+praw==7.6.0
 moviepy==1.0.3
 pytube==11.0.1
 requests==2.22.0
+google-api-python-client==2.8.0
+google-auth-oauthlib==0.4.4
+google-auth-httplib2==0.1.0

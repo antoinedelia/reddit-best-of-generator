@@ -2,6 +2,7 @@ import argparse
 import os
 import media_helper
 from reddit import Reddit
+from youtube import Youtube
 from dotenv import load_dotenv
 from loguru import logger
 from typing import List
@@ -200,6 +201,13 @@ def main():
     # 4 - Upload the media to Youtube
     if upload_to_youtube:
         logger.info("Uploading to Youtube")
+        youtube = Youtube()
+        youtube.upload_video(
+            os.path.join(DESTINATION_FOLDER, DESTINATION_FILE_NAME),
+            f"Best of {subreddit}",
+            f"Compilation of Reddit videos from Subreddit {subreddit}",
+            privacy_status="private",
+        )
 
     # 5 - Clean up the temp folder
     if not keep_temp_files:

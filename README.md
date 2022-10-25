@@ -26,6 +26,8 @@ To insert the posts's titles, we use the Roboto font. If you don't have it, plea
 ## Run the script
 
 ```shell
+$ python -m venv venv --upgrade-deps
+$ source venv/bin/activate
 $ pip install -r requirements.txt
 
 # Reddit credentials, to create them, go to https://www.reddit.com/prefs/apps/

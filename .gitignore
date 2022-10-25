@@ -5,3 +5,5 @@ output/
 temp/
 .pytest_cache/
 client_secrets.json
+.vscode/
+venv/

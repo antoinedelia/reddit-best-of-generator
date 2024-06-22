@@ -156,7 +156,9 @@ def main():
             )
             # Old v.redd.it links have a different audio url
             if "mp4" in original_url:
-                new_media.reddit_audio_url = "/".join(original_url.split("?")[0].split("/")[:-1]) + "/DASH_audio.mp4"
+                new_media.reddit_audio_url = (
+                    "/".join(original_url.split("?")[0].split("/")[:-1]) + "/DASH_AUDIO_128.mp4"
+                )
             else:
                 new_media.reddit_audio_url = "/".join(original_url.split("?")[0].split("/")[:-1]) + "/audio"
 

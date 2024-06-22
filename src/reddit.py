@@ -51,4 +51,4 @@ class Reddit:
         if not include_nsfw:
             posts = [post for post in posts if not post.over_18]
 
-        return posts
+        return list(posts)

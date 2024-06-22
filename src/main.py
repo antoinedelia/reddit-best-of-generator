@@ -147,6 +147,10 @@ def main():
             logger.info(f"Post {post.id} is a image, skipping it.")
             continue
 
+        if "redgifs" in post.url:
+            logger.warning("Reddit Gifs not supported for now")
+            continue
+
         if post.url.startswith("https://v.redd.it"):
             original_url = post.__dict__["secure_media"]["reddit_video"]["fallback_url"]
             new_media = media_helper.Media(

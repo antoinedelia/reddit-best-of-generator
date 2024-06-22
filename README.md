@@ -7,8 +7,15 @@ Automatic generation of video with top posts from a subreddit.
 Downloading ImageMagick is required to run this program.
 
 ```sh
-sudo apt-get install imagemagick
-sudo apt-get install libraqm-dev
+# Reference: https://gist.github.com/cuuupid/963db645047597723956af13ab87b73a
+wget https://www.imagemagick.org/download/ImageMagick.tar.gz
+tar xvzf ImageMagick.tar.gz
+cd ImageMagick-*
+./configure
+make
+sudo make install
+sudo ldconfig /usr/local/lib
+cd ..
 
 # Optional - some people had problems with the policy file, see: https://github.com/Zulko/moviepy/issues/401
 sudo vim /etc/ImageMagick-7/policy.xml

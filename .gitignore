@@ -7,3 +7,4 @@ temp/
 client_secrets.json
 .vscode/
 venv/
+ImageMagick*

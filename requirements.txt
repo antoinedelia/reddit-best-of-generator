@@ -3,6 +3,7 @@ google-auth-httplib2==0.1.0
 google-auth-oauthlib==0.4.4
 loguru==0.7.2
 moviepy==1.0.3
+opencv-python==4.10.0.84
 praw==7.7.1
 python-dotenv==1.0.1
 pytube==11.0.1

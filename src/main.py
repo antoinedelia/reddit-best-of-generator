@@ -19,7 +19,6 @@ REDDIT_OTP = input("Your Reddit OTP: ") if REDDIT_USER_PASSWORD else ""
 
 TEMP_FOLDER = "temp"
 DESTINATION_FOLDER = "output"
-DESTINATION_FILE_NAME = "output.mp4"
 
 IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".gif"]
 
@@ -79,7 +78,7 @@ def main():
     parser.add_argument(
         "--output-path",
         "-output",
-        required=True,
+        required=False,
         type=str,
         help="specify the output of where to store the final result of your video",
         dest="output_path",
@@ -102,6 +101,10 @@ def main():
     nsfw = args.nsfw
     posts_limit = args.posts_limit
     keep_temp_files = args.keep_temp_files
+
+    output_time_str = time if type == "top" else "day"
+    output_nswf_str = " (NSFW)" if nsfw else ""
+    DESTINATION_FILE_NAME = f"reddit_{posts_limit}_{type}_{output_time_str}_{subreddit}{output_nswf_str}.mp4"
 
     logger.info(f"Getting {posts_limit} {type} posts from /r/{subreddit}")
     if type == "top":

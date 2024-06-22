@@ -13,6 +13,9 @@ load_dotenv()
 REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID")
 REDDIT_CLIENT_SECRET = os.getenv("REDDIT_CLIENT_SECRET")
 REDDIT_USER_AGENT = os.getenv("REDDIT_USER_AGENT")
+REDDIT_USERNAME = os.getenv("REDDIT_USERNAME")
+REDDIT_USER_PASSWORD = os.getenv("REDDIT_USER_PASSWORD")
+REDDIT_OTP = input("Your Reddit OTP: ") if REDDIT_USER_PASSWORD else ""
 
 TEMP_FOLDER = "temp"
 DESTINATION_FOLDER = "output"
@@ -106,7 +109,9 @@ def main():
     logger.info(f"NSFW content will be {'included' if nsfw else 'excluded'}")
 
     # 1 - Get the posts from Reddit
-    reddit = Reddit(REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USER_AGENT)
+    reddit = Reddit(
+        REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USER_AGENT, REDDIT_USERNAME, REDDIT_USER_PASSWORD, REDDIT_OTP
+    )
     if type == "hot":
         posts = reddit.get_hot_posts(subreddit, posts_limit, nsfw)
     elif type == "top":

@@ -2,14 +2,26 @@ import praw
 
 
 class Reddit:
-    def __init__(self, client_id, client_secret, user_agent):
+    def __init__(self, client_id, client_secret, user_agent, username: str = "", password: str = "", otp: int = None):
         self.client_id = client_id
         self.client_secret = client_secret
         self.user_agent = user_agent
+        self.username = username
 
-        self.reddit = praw.Reddit(
-            client_id=self.client_id, client_secret=self.client_secret, user_agent=self.user_agent
-        )
+        if username and password and otp:
+            self.reddit = praw.Reddit(
+                client_id=self.client_id,
+                client_secret=self.client_secret,
+                user_agent=self.user_agent,
+                username=username,
+                password=f"{password}:{otp}",
+            )
+        else:
+            self.reddit = praw.Reddit(
+                client_id=self.client_id,
+                client_secret=self.client_secret,
+                user_agent=self.user_agent,
+            )
 
     def get_hot_posts(self, subreddit: str, limit: int = 10, include_nsfw: bool = False) -> list:
         """Get the last posts from a subreddit."""

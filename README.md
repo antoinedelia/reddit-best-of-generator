@@ -33,6 +33,11 @@ uv pip install -r requirements.txt
 echo REDDIT_CLIENT_ID=YOUR_REDDIT_CLIENT_ID >> .env
 echo REDDIT_CLIENT_SECRET=YOUR_REDDIT_CLIENT_SECRET >> .env
 echo REDDIT_USER_AGENT=SOME_USER_AGENT >> .env
+# This is only required if your account has 2FA setup
+# In that case, an OTP token will be asked when running the script
+# Make sure to put your password into quotes to prevent issues with special characters
+echo REDDIT_USERNAME=YOUR_REDDIT_USERNAME >> .env
+echo REDDIT_USER_PASSWORD='YOUR_REDDIT_USER_PASSWORD' >> .env
 
 python src/main.py --subreddit=funny --output=output.mp4
 python src/main.py --subreddit=TikTokCringe -output=output.mp4 --type=top --time=month --keep-temp-files --posts-limit=3

@@ -1,13 +1,13 @@
 import http.client
-import httplib2
-import random
+import secrets
 import time
-from loguru import logger
 
+import httplib2
+from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
-from google_auth_oauthlib.flow import InstalledAppFlow
+from loguru import logger
 
 # Explicitly tell the underlying HTTP transport library not to retry, since
 # we are handling retry logic ourselves.
@@ -121,6 +121,6 @@ class Youtube:
                     return
 
                 max_sleep = 2**retry
-                sleep_seconds = random.random() * max_sleep
+                sleep_seconds = secrets.randbelow(10) * max_sleep
                 logger.info(f"Sleeping {sleep_seconds} seconds and then retrying...")
                 time.sleep(sleep_seconds)

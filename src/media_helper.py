@@ -1,13 +1,14 @@
 import os
 import shutil
 import textwrap
-from typing import List
 from dataclasses import dataclass
-import requests
-from moviepy.video.VideoClip import TextClip, ColorClip
-from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
+from typing import List
+
 import moviepy.editor as editor
+import requests
 from loguru import logger
+from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
+from moviepy.video.VideoClip import ColorClip, TextClip
 
 VIDEO_EXTENSIONS = [".mp4", ".mkv", ".avi", ".mov"]
 
@@ -68,7 +69,7 @@ def download_from_url(id: str, url: str, dest_folder: str):
         logger.warning(f"{url} is a twitch link, not implemented yet.")
         return
 
-    r = requests.get(url, stream=True)
+    r = requests.get(url, stream=True, timeout=10)
     if r.ok:
         with open(file_path, "wb") as f:
             for chunk in r.iter_content(chunk_size=1024 * 8):
@@ -93,10 +94,7 @@ def combine_medias(posts: List[Media], source_folder: str, dest_folder: str, des
 
             logger.info(f"Combinining audio and video of post {post.id}")
             video = editor.VideoFileClip(video_file_path)
-            if video.w >= video.h:
-                video = video.resize(width=1920)
-            else:
-                video = video.resize(height=1080)
+            video = video.resize(width=1920) if video.w >= video.h else video.resize(height=1080)
 
             if video.w > 1920:
                 video = video.resize(width=1920)

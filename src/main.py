@@ -1,11 +1,12 @@
 import argparse
 import os
+from typing import List
+
 import media_helper
-from reddit import Reddit
-from youtube import Youtube
 from dotenv import load_dotenv
 from loguru import logger
-from typing import List
+from reddit import Reddit
+from youtube import Youtube
 
 load_dotenv()
 

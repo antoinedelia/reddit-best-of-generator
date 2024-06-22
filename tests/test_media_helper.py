@@ -1,5 +1,6 @@
 from typing import List
-from src.media_helper import Media, download_from_url, combine_medias
+
+from src.media_helper import Media, combine_medias, download_from_url
 
 TEMP_FOLDER = "temp"
 

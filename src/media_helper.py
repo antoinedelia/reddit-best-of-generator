@@ -18,6 +18,7 @@ PROVIDER_EXTENSIONS_MAP = {
     "imgur": ".gif",
     "reddit": ".jpg",
     "gfycat": ".gif",
+    "redgifs": ".mp4",
     "v.redd.it": ".mp4",
 }
 
@@ -33,7 +34,7 @@ class Media:
     reddit_audio_url: str = None
 
 
-def download_from_url(id: str, url: str, dest_folder: str):
+def download_from_url(id: str, url: str, dest_folder: str) -> bool:
     if not os.path.exists(dest_folder):
         os.makedirs(dest_folder)
 
@@ -49,25 +50,29 @@ def download_from_url(id: str, url: str, dest_folder: str):
 
     if os.path.isfile(file_path):
         logger.info(f"{file_path} already exists.")
-        return
+        return False
 
     # TODO Need youtube-dl to download the video
     if "youtube" in url or "youtu.be" in url:
         logger.warning(f"{url} is a youtube video, not implemented yet.")
-        return
+        return False
 
     if "imgur" in url:
         logger.warning(f"{url} is an imgur link, not implemented yet.")
-        return
+        return False
 
     # Gfycat redirects to a web page, not directly to the video
     if "gfycat" in url:
         logger.warning(f"{url} is a gfycat link, not implemented yet.")
-        return
+        return False
+
+    if "redgifs" in url:
+        logger.warning(f"{url} is a gfycat link, not implemented yet.")
+        return False
 
     if "twitch" in url:
         logger.warning(f"{url} is a twitch link, not implemented yet.")
-        return
+        return False
 
     r = requests.get(url, stream=True, timeout=10)
     if r.ok:
@@ -79,6 +84,8 @@ def download_from_url(id: str, url: str, dest_folder: str):
                     os.fsync(f.fileno())
     else:
         logger.warning("Download failed: status code {}\n{}".format(r.status_code, r.text))
+        return False
+    return True
 
 
 def combine_medias(posts: List[Media], source_folder: str, dest_folder: str, dest_filename: str):

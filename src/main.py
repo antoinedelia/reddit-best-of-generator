@@ -147,10 +147,6 @@ def main():
             logger.info(f"Post {post.id} is a image, skipping it.")
             continue
 
-        if "redgifs" in post.url:
-            logger.warning("Reddit Gifs not supported for now")
-            continue
-
         if post.url.startswith("https://v.redd.it"):
             original_url = post.__dict__["secure_media"]["reddit_video"]["fallback_url"]
             new_media = media_helper.Media(
@@ -170,6 +166,18 @@ def main():
                 new_media.reddit_audio_url = "/".join(original_url.split("?")[0].split("/")[:-1]) + "/audio"
 
             filtered_posts.append(new_media)
+        # Not sure if redgifs require downloading audio + video separately or not
+        # Keeping a special if case if needed while I figure it out
+        elif "redgifs" in post.url:
+            filtered_posts.append(
+                media_helper.Media(
+                    id=post.id,
+                    title=post.title,
+                    type="redgifs",
+                    is_reddit_media=False,
+                    original_url=post.url,
+                )
+            )
         else:
             filtered_posts.append(
                 media_helper.Media(
@@ -199,19 +207,29 @@ def main():
     # post.__dict__["media"]["reddit_video"]["is_gif"] -> False
 
     # 2 - Download the media from the posts
+    downloaded_posts = []
     for post in filtered_posts:
         if post.is_reddit_media:
             logger.info(f"Downloading Reddit video {post.reddit_video_url}")
-            media_helper.download_from_url(f"video_{post.id}", post.reddit_video_url, TEMP_FOLDER)
+            is_video_downloaded = media_helper.download_from_url(f"video_{post.id}", post.reddit_video_url, TEMP_FOLDER)
 
             logger.info(f"Downloading Reddit audio {post.reddit_audio_url}")
-            media_helper.download_from_url(f"audio_{post.id}", post.reddit_audio_url, TEMP_FOLDER)
+            is_audio_downloaded = media_helper.download_from_url(f"audio_{post.id}", post.reddit_audio_url, TEMP_FOLDER)
+            if is_video_downloaded and is_audio_downloaded:
+                downloaded_posts.append(post)
         else:
             logger.info(f"Downloading video {post.original_url}")
-            media_helper.download_from_url(f"video_{post.id}", post.original_url, TEMP_FOLDER)
+            is_downloaded = media_helper.download_from_url(f"video_{post.id}", post.original_url, TEMP_FOLDER)
+            if is_downloaded:
+                downloaded_posts.append(post)
+    logger.info(f"Downloaded {len(downloaded_posts)}/{len(filtered_posts)} posts.")
+
+    if not downloaded_posts:
+        logger.warning("No posts were downloaded. Exiting.")
+        exit()
 
     # 3 - Create the video by combining the media
-    media_helper.combine_medias(filtered_posts, TEMP_FOLDER, DESTINATION_FOLDER, DESTINATION_FILE_NAME)
+    media_helper.combine_medias(downloaded_posts, TEMP_FOLDER, DESTINATION_FOLDER, DESTINATION_FILE_NAME)
 
     # 4 - Upload the media to Youtube
     if upload_to_youtube:

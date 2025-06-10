@@ -7,4 +7,4 @@ opencv-python==4.10.0.84
 praw==7.7.1
 python-dotenv==1.0.1
 pytube==11.0.1
-requests==2.32.3
+requests==2.32.4
